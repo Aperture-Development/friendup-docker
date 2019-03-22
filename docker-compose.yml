@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+
+  friendup-mariadb:
+    image: mariadb:10.3
+    container_name: friendup-mariadb
+    restart: always
+    networks:
+      - friendup-bridge
+    expose:
+      - 3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=friendupmysqlROOTpass
+
+  friendup:
+    image: ubuntu:18.04
+    command: 
+    container_name: friendup-app
+    restart: always
+    networks:
+      - friendup-bridge
+    ports:
+      - 6502:6502
+    volumes:
+      - friendup-data:/friend/core/storage
+    depends_on:
+      - friendup-mariadb
+    environment:
+      - MYSQL_USER=friendup
+      - MYSQL_PASSWORD=friendup1
+      - MYSQL_DATABASE=friendup
+      - MYSQL_HOST=friendup-mariadb
+      - MYSQL_ROOT_PASSWORD=friendupmysqlROOTpass
+      - DOCKER_FRIEND_DOMAIN=example.com
+      - DOCKER_FRIEND_TLS=0
+      - DOCKER_FRIEND_FEATURE_CHAT=0
+      - DOCKER_FRIEND_FEATURE_NETWORK=0
+
+volumes:
+  friendup-data:
+    driver: local
+
+networks:
+  friendup-bridge:
+    driver: bridge
