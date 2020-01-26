@@ -1,29 +1,38 @@
 #!/bin/bash
 
-# Check if friend already exists
-if [ -e /friend/core/FriendCore ]; then
-    unset MYSQL_USER
-    unset MYSQL_PASSWORD
-    unset MYSQL_DATABASE
-    unset MYSQL_ROOT_PASSWORD
-    nohup ./friend/core/FriendCore >> /dev/null &
-else
-    git clone
-    ./friend/friendup/install.sh
-    unset MYSQL_USER
-    unset MYSQL_PASSWORD
-    unset MYSQL_DATABASE
-    unset MYSQL_ROOT_PASSWORD
+# Check if Database Exists, if not create it
+RESULT=`mysqlshow --host=friendup-mariadb --user=root --password=$MYSQL_ROOT_PASSWORD friendup| grep -v Wildcard | grep -o friendup`
+if [ "$RESULT" == "friendup" ]; then
+    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -hfriendup-mariadb -e "CREATE DATABASE $MYSQL_DATABASE;CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD'; GRANT ALL PRIVILEGES ON '$MYSQL_DATABASE'.* TO '$MYSQL_USER'@'%' WITH GRANT OPTION;"
+    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -hfriendup-mariadb < /friendup/db/FriendCoreDatabase.sql
 fi
 
-if [ "$DOCKER_FRIEND_FEATURE_CHAT" -eq "1" ]; then
-    ./friend/friendup/installFriendChat.sh
+# Check if the config FIle already exists, if not create it
+if [ -f '/friendup/build/cfg/cfg.ini' ]; then
+    cd /friendup/build/
+    /friendup/build/FriendCore
 else
-    echo "FriendChat feature has not been selected."
-fi
-
-if [ "$DOCKER_FRIEND_FEATURE_NETWORK" -eq "1" ]; then
-    ./friend/friendup/installFriendNetwork.sh   
-else
-    echo "FriendNetwork feature has not been selected."
+    touch /friendup/build/cfg/cfg.ini
+    echo '[DatabaseUser]' >> /friendup/build/cfg/cfg.ini
+    echo 'host=friendup-mariadb' >> /friendup/build/cfg/cfg.ini
+    echo "login=$MYSQL_USER" >> /friendup/build/cfg/cfg.ini
+    echo "password=$MYSQL_PASSWORD" >> /friendup/build/cfg/cfg.ini
+    echo "dbname=$MYSQL_DATABASE" >> /friendup/build/cfg/cfg.ini
+    echo '' >> /friendup/build/cfg/cfg.ini
+    echo '[FriendCore]' >> /friendup/build/cfg/cfg.ini
+    echo "fchost = $DOCKER_FRIEND_DOMAIN" >> /friendup/build/cfg/cfg.ini
+    echo 'port = 6502' >> /friendup/build/cfg/cfg.ini
+    echo 'fcupload = storage/' >> /friendup/build/cfg/cfg.ini
+    echo '' >> /friendup/build/cfg/cfg.ini
+    echo '[Core]' >> /friendup/build/cfg/cfg.ini
+    echo 'SSLEnable=0' >> /friendup/build/cfg/cfg.ini
+    echo 'port=6502' >> /friendup/build/cfg/cfg.ini
+    echo '' >> /friendup/build/cfg/cfg.ini
+    echo '[FriendNetwork]' >> /friendup/build/cfg/cfg.ini
+    echo 'enabled = 0' >> /friendup/build/cfg/cfg.ini
+    echo '' >> /friendup/build/cfg/cfg.ini
+    echo '[FriendChat]' >> /friendup/build/cfg/cfg.ini
+    echo 'enabled = 0' >> /friendup/build/cfg/cfg.ini
+    cd /friendup/build/
+    /friendup/build/FriendCore
 fi
