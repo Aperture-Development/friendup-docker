@@ -10,6 +10,8 @@ services:
     restart: always
     networks:
       - friendup-bridge
+    volumes: 
+      - friendup-dbdata:/var/lib/mysql
     expose:
       - 3306
     environment: 
@@ -27,11 +29,14 @@ services:
       - 6502:6502
     volumes:
       - friendup-data:/friendup/build/storage
+      - friendup-data:/dockervolume
     depends_on:
       - friendup-db
 
 volumes:
   friendup-data:
+    driver: local
+  friendup-dbdata:
     driver: local
 
 networks:
