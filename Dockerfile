@@ -4,6 +4,9 @@ FROM ubuntu:18.04
 LABEL maintainer="Aperture Development <webmaster@Aperture-Development.de>"
 # Disable interactive questions
 ENV DEBIAN_FRONTEND noninteractive
+# Because of a ANOYING caching bug, I need to have this:
+ADD https://api.github.com/repos/FriendUPCloud/friendup/git/refs/heads/master friendup_version.json
+ADD https://api.github.com/repos/Aperture-Development/friendup-docker/git/refs/heads/master friendup_docker_version.json
 # Install Requirements and download friendup
 RUN apt-get update
 RUN apt-get install -y git
