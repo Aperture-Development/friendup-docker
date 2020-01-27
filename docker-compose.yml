@@ -1,21 +1,25 @@
-version: '2'
+version: '3'
 
 services:
 
-  friendup-mariadb:
-    image: mariadb:10.4.11
-    container_name: friendup-mariadb
+  friendup-db:
+    image: mariadb:10.4
+    container_name: friendup-db
+    env_file:
+    - .env
     restart: always
     networks:
       - friendup-bridge
     expose:
       - 3306
-    environment:
-      - MYSQL_ROOT_PASSWORD=friendupmysqlROOTpass
+    environment: 
+      - MYSQL_INITDB_SKIP_TZINFO=1
 
   friendup:
     image: friendup:latest
     container_name: friendup-app
+    env_file:
+    - .env
     restart: always
     networks:
       - friendup-bridge
@@ -24,14 +28,7 @@ services:
     volumes:
       - friendup-data:/friendup/build/storage
     depends_on:
-      - friendup-mariadb
-    environment:
-      - MYSQL_USER=friendup
-      - MYSQL_PASSWORD=friendup1
-      - MYSQL_DATABASE=friendup
-      - MYSQL_HOST=friendup-mariadb
-      - MYSQL_ROOT_PASSWORD=friendupmysqlROOTpass
-      - DOCKER_FRIEND_DOMAIN=example.com
+      - friendup-db
 
 volumes:
   friendup-data:
