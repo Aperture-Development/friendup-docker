@@ -1,5 +1,5 @@
 # FriendUP Docker
-![Build Status](https://tcci.aperture-development.de/app/rest/builds/buildType:(id:FriendUP_Docker)/statusIcon.svg) ![Licence](https://img.shields.io/badge/licence-MIT-brightgreen)
+[![Build Status](https://tcci.aperture-development.de/app/rest/builds/buildType:(id:FriendUP_Docker)/statusIcon.svg)](https://hub.docker.com/r/aperturedevelopment/friendup) ![Licence](https://img.shields.io/badge/licence-MIT-brightgreen)
 
 This is the repository for the FriendUP docker container. The purpose of this is to allow people to easily deploy FriendUP without complicated setups or anything. We achive that using the Docker Platform, Docker containers are pre-setup and ready-to-deploy application containers.
 
@@ -33,10 +33,11 @@ To update friend go back to the place of the docker-compose.yml file using a cli
 
 # Additional Info
 
-FriendUP: https://github.com/FriendUPCloud/friendup
-Docker: https://www.docker.com/
-Docker-Compose: https://docs.docker.com/compose/
-
-This repository and the code is licenced under MIT.
+FriendUP: https://github.com/FriendUPCloud/friendup  
+Docker: https://www.docker.com/  
+Docker-Compose: https://docs.docker.com/compose/  
+DockerHub: https://hub.docker.com/r/aperturedevelopment/friendup  
+  
+This repository and the code is licenced under MIT.  
 
 The FriendUP-Docker container has been made by [Aperture Development](https://www.aperture-development.de/). We are in no way owning or claiming ownership over FriendUP and it's code. 
