@@ -1,44 +1,69 @@
+###################
+## !!!WARNING!!! ##
+###################
+# Normally you don't have to edit this file as all variables are defined in the .env file
+# Be sure to know what you are doing before editing this file!
 version: '3'
-
 services:
-
+  # Friendup MariaDB Database
   friendup-db:
+    # Use MariaDB 10.4
     image: mariadb:10.4
+    # Set the container name
     container_name: friendup-db
+    # Set the enviroment variables file
     env_file:
     - .env
+    # Set how the container restarts on fails
     restart: always
+    # Add the container to a internal network
     networks:
       - friendup-bridge
+    # Link container data folder with docker volume
     volumes: 
       - friendup-dbdata:/var/lib/mysql
+    # Expose ports
     expose:
       - 3306
+    # Set enviroment variables
     environment: 
-      - MYSQL_INITDB_SKIP_TZINFO=1
+      - MYSQL_INITDB_SKIP_TZINFO=1 # Due to a bug in MariaDB this enviroment variable is important!
 
+  # Friendup container
   friendup:
-    image: friendup:latest
+    # Use the latest FriendUP container
+    image: aperturedevelopment/friendup:latest
+    # Set the container name
     container_name: friendup-app
+    # Set the enviroment variables file
     env_file:
     - .env
+    # Set how the container restarts on fails
     restart: always
+    # Add the container to a internal network
     networks:
       - friendup-bridge
+    # Expose ports
     ports:
       - 6502:6502
+    # Link container data folders with docker volume
     volumes:
       - friendup-data:/friendup/build/storage
       - friendup-data:/dockervolume
+    # Set a depend to mark the container creation and start order
     depends_on:
       - friendup-db
 
+# Define volumes
 volumes:
+  # Define Friendup data volume
   friendup-data:
     driver: local
+  # Define Friendup database data volume
   friendup-dbdata:
     driver: local
 
+# Define internal networks
 networks:
   friendup-bridge:
     driver: bridge
