@@ -15,11 +15,9 @@ RUN git clone https://github.com/FriendUPCloud/friendup /friendup
 # Copy our Entrypoint into the container and make it executable
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-# Link libaries fot the build process and build friend
-RUN ln /usr/lib/x86_64-linux-gnu/libcrypto.a /friendup/libs-ext/openssl/libcrypto.a &&\
-    ln /usr/lib/x86_64-linux-gnu/libssl.a /friendup/libs-ext/openssl/libssl.a
+# Build friend
 RUN cd /friendup &&\
-    make setup &&\
+    make clean setup &&\
     make compile install
 # Set the entrypoint for the container
 ENTRYPOINT ["/entrypoint.sh"]
