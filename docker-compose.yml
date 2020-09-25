@@ -48,8 +48,8 @@ services:
       - 6502:6502
     # Link container data folders with docker volume
     volumes:
-      - friendup-data:/friendup/build/storage
-      - friendup-data:/dockervolume
+      - friendup-data:/opt/friendup/storage
+      - friendup-config:/opt/friendup/cfg
     # Set a depend to mark the container creation and start order
     depends_on:
       - friendup-db
@@ -58,6 +58,9 @@ services:
 volumes:
   # Define Friendup data volume
   friendup-data:
+    driver: local
+  # Seperate volume for the FriendUP config
+  friendup-config:
     driver: local
   # Define Friendup database data volume
   friendup-dbdata:
