@@ -1,4 +1,12 @@
 #!/bin/bash
+export MYSQL_PWD="$MYSQL_PASSWORD"
+
+# Check for old file structure
+if [ -d '/friendup/build/storage' ]; then
+    echo "[ERROR] Old filestructure found, please get the new version of the docker-compose.yml file here:"
+    echo "https://github.com/Aperture-Development/friendup-docker"
+    exit 1
+fi
 
 # Check if database is ready
 RESULT="FirstStart"
@@ -10,56 +18,44 @@ do
 done
 
 # Check if Database Exists, if not create it
-RESULT=$(echo $(mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -hfriendup-db --protocol=tcp -D"$MYSQL_DATABASE" -Bse 'SHOW TABLES' -D"$MYSQL_DATABASE" | wc -l))
+RESULT=$(echo $(mysql -u"$MYSQL_USER" -hfriendup-db --protocol=tcp -D"$MYSQL_DATABASE" -Bse 'SHOW TABLES' -D"$MYSQL_DATABASE" | wc -l))
 if [ "$RESULT" == "0" ]; then
     echo '[ENTRY] Creating Database'
-    mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABASE" -hfriendup-db --protocol=tcp < /friendup/db/FriendCoreDatabase.sql
+    mysql -u"$MYSQL_USER" -D"$MYSQL_DATABASE" -hfriendup-db --protocol=tcp < /opt/friendup/db/FriendCoreDatabase.sql
+
+    for i in $(ls -v /opt/friendup/sqlupdatescripts/); do
+        echo "[ENTRY] Running $i"
+        mysql -u"$MYSQL_USER" -D"$MYSQL_DATABASE" -hfriendup-db --protocol=tcp < /opt/friendup/sqlupdatescripts/"$i"
+    done;
 fi
 
 # Check if the config FIle already exists, if not create it
-if [ -f '/friendup/build/cfg/cfg.ini' ]; then
-    echo '[ENTRY] Configuration found, starting FriendCore'
-    cd /friendup/build/
-    /friendup/build/FriendCore
-else
-    if [ -f '/dockervolume/cfg.ini' ]; then
-        cp /dockervolume/cfg.ini /friendup/build/cfg/cfg.ini
-        echo '[ENTRY] Found config file, copying it back over'
-    else
-        touch /friendup/build/cfg/cfg.ini
-        echo '[DatabaseUser]' >> /friendup/build/cfg/cfg.ini
-        echo 'host=friendup-db' >> /friendup/build/cfg/cfg.ini
-        echo "login=$MYSQL_USER" >> /friendup/build/cfg/cfg.ini
-        echo "password=$MYSQL_PASSWORD" >> /friendup/build/cfg/cfg.ini
-        echo "dbname=$MYSQL_DATABASE" >> /friendup/build/cfg/cfg.ini
-        echo '' >> /friendup/build/cfg/cfg.ini
-        echo '[FriendCore]' >> /friendup/build/cfg/cfg.ini
-        echo "fchost = $DOCKER_FRIEND_DOMAIN" >> /friendup/build/cfg/cfg.ini
-        echo 'port = 6502' >> /friendup/build/cfg/cfg.ini
-        echo 'fcupload = storage/' >> /friendup/build/cfg/cfg.ini
-        echo '' >> /friendup/build/cfg/cfg.ini
-        echo '[Core]' >> /friendup/build/cfg/cfg.ini
-        echo 'SSLEnable=0' >> /friendup/build/cfg/cfg.ini
-        echo 'port=6502' >> /friendup/build/cfg/cfg.ini
-        echo '' >> /friendup/build/cfg/cfg.ini
-        echo '[FriendNetwork]' >> /friendup/build/cfg/cfg.ini
-        echo 'enabled = 0' >> /friendup/build/cfg/cfg.ini
-        echo '' >> /friendup/build/cfg/cfg.ini
-        echo '[FriendChat]' >> /friendup/build/cfg/cfg.ini
-        echo 'enabled = 0' >> /friendup/build/cfg/cfg.ini
-        cp /friendup/build/cfg/cfg.ini /dockervolume/cfg.ini
-        echo '[ENTRY] Created new config file'
-    fi
-    cd /friendup/build/
-    /friendup/build/FriendCore > /firstrun.log&
-    echo '[ENTRY] Please wait while we prepare everything...'
-    until [ "$RESULT" == "Starting FriendCore" ]
-    do
-        sleep 10s
-        RESULT=$(grep -o 'Starting FriendCore' /firstrun.log)
-    done
-    sleep 10s
-    PID=$(pidof FriendCore)
-    kill -9 "$PID"
-    
+if [ ! -f '/opt/friendup/cfg/cfg.ini' ]; then
+    touch /opt/friendup/cfg/cfg.ini
+    echo '[DatabaseUser]'                   >> /opt/friendup/cfg/cfg.ini
+    echo 'host=friendup-db'                 >> /opt/friendup/cfg/cfg.ini
+    echo "login=$MYSQL_USER"                >> /opt/friendup/cfg/cfg.ini
+    echo "password=$MYSQL_PASSWORD"         >> /opt/friendup/cfg/cfg.ini
+    echo "dbname=$MYSQL_DATABASE"           >> /opt/friendup/cfg/cfg.ini
+    echo ''                                 >> /opt/friendup/cfg/cfg.ini
+    echo '[FriendCore]'                     >> /opt/friendup/cfg/cfg.ini
+    echo "fchost = $DOCKER_FRIEND_DOMAIN"   >> /opt/friendup/cfg/cfg.ini
+    echo 'port = 6502'                      >> /opt/friendup/cfg/cfg.ini
+    echo 'fcupload = storage/'              >> /opt/friendup/cfg/cfg.ini
+    echo ''                                 >> /opt/friendup/cfg/cfg.ini
+    echo '[Core]'                           >> /opt/friendup/cfg/cfg.ini
+    echo 'SSLEnable=0'                      >> /opt/friendup/cfg/cfg.ini
+    echo 'port=6502'                        >> /opt/friendup/cfg/cfg.ini
+    echo ''                                 >> /opt/friendup/cfg/cfg.ini
+    echo '[FriendNetwork]'                  >> /opt/friendup/cfg/cfg.ini
+    echo 'enabled = 0'                      >> /opt/friendup/cfg/cfg.ini
+    echo ''                                 >> /opt/friendup/cfg/cfg.ini
+    echo '[FriendChat]'                     >> /opt/friendup/cfg/cfg.ini
+    echo 'enabled = 0'                      >> /opt/friendup/cfg/cfg.ini
+    echo '[ENTRY] Created new config file'
 fi
+
+# Finish up and start Friend
+unset MYSQL_PWD
+cd /opt/friendup/
+/opt/friendup/FriendCore
