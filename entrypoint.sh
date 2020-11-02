@@ -34,29 +34,22 @@ if [ "$RESULT" == "0" ]; then
     done;
 fi
 
-# Check if the config FIle already exists, if not create it
+if [ ! -f '/opt/friendup/cfg/crt/key.pem' ]; then
+    # generate new ssl certificate
+    openssl req -nodes -sha512 -x509 -days 3650 -newkey rsa:2048 -keyout /opt/friendup/cfg/crt/key.pem -out /opt/friendup/cfg/crt/certificate.pem -subj "/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=$DOCKER_FRIEND_DOMAIN"
+else
+    # generate csr from existing key
+    openssl req -new -sha512 -x509 -nodes -days 3650 -key /opt/friendup/cfg/crt/key.pem -out /opt/friendup/cfg/crt/certificate.pem -subj "/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=$DOCKER_FRIEND_DOMAIN"
+fi
+
+# Check if the config File already exists, if not create it
 if [ ! -f '/opt/friendup/cfg/cfg.ini' ]; then
-    touch /opt/friendup/cfg/cfg.ini
-    echo '[DatabaseUser]'                   >> /opt/friendup/cfg/cfg.ini
-    echo "host=$MYSQL_HOST"                 >> /opt/friendup/cfg/cfg.ini
-    echo "login=$MYSQL_USER"                >> /opt/friendup/cfg/cfg.ini
-    echo "password=$MYSQL_PASSWORD"         >> /opt/friendup/cfg/cfg.ini
-    echo "dbname=$MYSQL_DATABASE"           >> /opt/friendup/cfg/cfg.ini
-    echo ''                                 >> /opt/friendup/cfg/cfg.ini
-    echo '[FriendCore]'                     >> /opt/friendup/cfg/cfg.ini
-    echo "fchost = $DOCKER_FRIEND_DOMAIN"   >> /opt/friendup/cfg/cfg.ini
-    echo 'port = 6502'                      >> /opt/friendup/cfg/cfg.ini
-    echo 'fcupload = storage/'              >> /opt/friendup/cfg/cfg.ini
-    echo ''                                 >> /opt/friendup/cfg/cfg.ini
-    echo '[Core]'                           >> /opt/friendup/cfg/cfg.ini
-    echo 'SSLEnable=0'                      >> /opt/friendup/cfg/cfg.ini
-    echo 'port=6502'                        >> /opt/friendup/cfg/cfg.ini
-    echo ''                                 >> /opt/friendup/cfg/cfg.ini
-    echo '[FriendNetwork]'                  >> /opt/friendup/cfg/cfg.ini
-    echo 'enabled = 0'                      >> /opt/friendup/cfg/cfg.ini
-    echo ''                                 >> /opt/friendup/cfg/cfg.ini
-    echo '[FriendChat]'                     >> /opt/friendup/cfg/cfg.ini
-    echo 'enabled = 0'                      >> /opt/friendup/cfg/cfg.ini
+    cp /opt/friendup/cfg/cfg.ini.sample /opt/friendup/cfg/cfg.ini
+    sed -i "s/#DB_USER#/$MYSQL_USER/" /opt/friendup/cfg/cfg.ini
+    sed -i "s/#DB_PASS#/$MYSQL_PASSWORD/" /opt/friendup/cfg/cfg.ini
+    sed -i "s/#DB_HOST#/$MYSQL_HOST/" /opt/friendup/cfg/cfg.ini
+    sed -i "s/#DB_NAME#/$MYSQL_DATABASE/" /opt/friendup/cfg/cfg.ini
+    sed -i "s/#FRND_DOMAIN#/$DOCKER_FRIEND_DOMAIN/" /opt/friendup/cfg/cfg.ini
     echo '[INFO] Created new config file'
 fi
 
