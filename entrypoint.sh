@@ -31,10 +31,10 @@ if [ "$RESULT" == "0" ]; then
     echo '[INFO] Creating Database'
     mysql -u"$MYSQL_USER" -D"$MYSQL_DATABASE" -h"$MYSQL_HOST" --protocol=tcp < /opt/friendup/db/FriendCoreDatabase.sql
 
-    for i in $(ls -v /opt/friendup/sqlupdatescripts/); do
-        echo "[INFO] Running $i"
-        mysql -u"$MYSQL_USER" -D"$MYSQL_DATABASE" -h"$MYSQL_HOST" --protocol=tcp < /opt/friendup/sqlupdatescripts/"$i"
-    done;
+    #for i in $(ls -v /opt/friendup/sqlupdatescripts/); do
+    #    echo "[INFO] Running $i"
+    #    mysql -u"$MYSQL_USER" -D"$MYSQL_DATABASE" -h"$MYSQL_HOST" --protocol=tcp < /opt/friendup/sqlupdatescripts/"$i"
+    #done;
 fi
 
 # SSL Certificate
