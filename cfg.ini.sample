@@ -1,0 +1,23 @@
+[DatabaseUser]
+login = #DB_USER#
+password = #DB_PASS#
+host = #DB_HOST#
+dbname = #DB_NAME#
+
+[FriendCore]
+fchost = #FRND_DOMAIN#
+port = 6502
+fcupload = storage/
+
+[Core]
+port=6502
+SSLEnable=0
+WSSSLEnable=0
+CSSLEnable=0
+
+[FriendNetwork]
+enabled = 0
+
+[FriendChat]
+enabled = 0
+
