@@ -46,6 +46,7 @@ services:
     # Expose ports
     ports:
       - 6502:6502
+      - 6500:6500
     # Link container data folders with docker volume
     volumes:
       - friendup-data:/opt/friendup/storage
@@ -53,6 +54,9 @@ services:
     # Set a depend to mark the container creation and start order
     depends_on:
       - friendup-db
+    # Set a enviroment variable for versioning
+    environment:
+    - FRND_DOCKER_VERSION=1
 
 # Define volumes
 volumes:
